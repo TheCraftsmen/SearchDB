@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=windows-1252" http-equiv="content-type">
+    <title>jQuery Example</title>
+    <script type="text/javascript"
+      src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+      var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+
+  </head>
+  <body>
+
+    <div id="textos"></div>
+    <script>
+      $(function(){
+        var texto = "";
+        $.getJSON($SCRIPT_ROOT + '/_host_ping', function(datos){
+          $.each(datos.hostping, function(i, hostping){
+            texto += "<div>";
+            texto += "<h3>" + hostping.hostname;
+            texto += " " + hostping.connectStatus;
+            texto += " " + hostping.connectTime + "</h3>";
+            texto += "</div>";
+            console.log(texto);
+          });
+          $("#textos").html(texto);
+        });
+      });
+      setTimeout(function(){window.location.reload(1);}, 30000);
+    </script>
+  </body>
+</html>
