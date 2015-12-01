@@ -3,8 +3,9 @@
   <head>
     <meta content="text/html; charset=windows-1252" http-equiv="content-type">
     <title>jQuery Example</title>
+    <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript"
-      src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+      src="static/jquery-1.11.3.min.js">
     </script>
     <script type="text/javascript">
       var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
@@ -12,24 +13,61 @@
 
   </head>
   <body>
-
+    <ul id="sidebar" class="nav nav-pills nav-stacked" style="max-width: 200px;float:left;">
+        <li class="active"><a href="#"><span class="glyphicon glyphicon-menu-hamburger"></span>  Base de Datos</a></li>
+        <li><a href="hostSave"> Nueva</a></li>
+        <li><a href="hostSave"> Editar</a></li>
+        <li><a href="hostSave"> Detalles</a></li>
+    </ul>
+    <div class="container" style="float:right;">
+      <h2 class="text-primary"">Conexiones a Base de Datos</h2>
+      <p>Lista de prueba a conexiones:</p>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Dominio</th>
+            <th>Estado de conexion</th>
+            <th>Utimo intento</th>
+          </tr>
+        </thead>
+        <tbody id="textos"></tbody>
+      </table>
+    </div>
     <div id="textos"></div>
     <script>
-      $(function(){
+    $(document).ready(function(){
         var texto = "";
         $.getJSON($SCRIPT_ROOT + '/_host_ping', function(datos){
-          $.each(datos.hostping, function(i, hostping){
-            texto += "<div>";
-            texto += "<h3>" + hostping.hostname;
-            texto += " " + hostping.connectStatus;
-            texto += " " + hostping.connectTime + "</h3>";
-            texto += "</div>";
-            console.log(texto);
-          });
-          $("#textos").html(texto);
-        });
+            $.each(datos.hostping, function(i, hostping){
+                texto += "<tr>";
+                texto += "<td>" + hostping.hostname + "</td>";
+                texto += "<td>" + hostping.connectStatus + "</td>";
+                texto += "<td>" + hostping.connectTime + "</td>";
+                texto += "</tr>";
+              });
+              $("#textos").html(texto);
+            });
+    });
+    </script>
+    <script>
+    $(document).ready(function(){
+          $.ajaxSetup({cache: false});
+          setInterval(function(){
+            var texto = "";
+            $.getJSON($SCRIPT_ROOT + '/_host_ping', function(datos){
+              $.each(datos.hostping, function(i, hostping){
+                texto += "<tr>";
+                texto += "<td>" + hostping.hostname + "</td>";
+                texto += "<td>" + hostping.connectStatus + "</td>";
+                texto += "<td>" + hostping.connectTime + "</td>";
+                texto += "</tr>";
+              });
+              $("#textos").html(texto);
+            });
+
+          }, 60000);
       });
-      setTimeout(function(){window.location.reload(1);}, 30000);
+
     </script>
   </body>
 </html>

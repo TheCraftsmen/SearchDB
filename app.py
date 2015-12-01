@@ -3,6 +3,7 @@
 from flask import Flask, jsonify, render_template, request, url_for, redirect
 from flask_restful import Resource, Api
 from flask.ext.sqlalchemy import SQLAlchemy
+from threading import Thread, Lock
 import MySQLdb
 import datetime
 
@@ -14,13 +15,13 @@ api = Api(app)
 db = SQLAlchemy(app)
 from models import *
 
-todo = dict()
 
 
 class TodoSimple(Resource):
 
-    USER = 'user'
-    PASSWD = 'passwd'
+    USER = 'blas'
+    PASSWD = 'fuckblas'
+    MUTEX = Lock()
 
     def __init__(self):
         super(TodoSimple, self).__init__()
@@ -30,7 +31,13 @@ class TodoSimple(Resource):
             for row in hostfile:
                 if row:
                     host, database = row.replace('\n', '').split(',')
-                    self.dataConnection(str(host), str(database))
+                    TodoSimple.MUTEX.acquire()
+                    try:
+                        t = Thread(target=self.dataConnection,
+                             args=(str(host), str(database)))
+                        t.start()
+                    finally:
+                        TodoSimple.MUTEX.release()
         return "Datos almacenados"
 
     def dataConnection(self, host, db):
@@ -42,8 +49,8 @@ class TodoSimple(Resource):
             conexion = "no hay conexion"
         self.dataCollector(host, conexion)
 
+
     def dataCollector(self, host, value):
-        todo[host] = value
         db.session.query(HostPing).filter(HostPing.hostName == host).\
         update({'connectStatus': value, 'connectTime': datetime.datetime.now()})
         print datetime.datetime.now()
